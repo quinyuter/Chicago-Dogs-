@@ -1,0 +1,198 @@
+---
+title: "FM.series.SprayChart"
+author: "Quin Yuter"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importing libraries
+```{r}
+## MLB Stadiums package
+library(GeomMLBStadiums)
+library(tidyverse)
+library(ggplot2)
+```
+
+## Getting the csv file of just hits from the Kane County Cougars
+```{r}
+allgames <- read.csv("/Users/quinyuter/Desktop/Chicago Dogs/Spray Charts/all_games_as_of_5_30.csv")
+
+series <- allgames %>%
+  filter(Away_Team == "F-M",
+         Batter_Team == "F-M",
+         !is.na(Field_Location)) %>%
+  add_column(Numbers = 0, 
+             hc_x = 0, 
+             hc_y = 0)
+
+## Merging pop flies and fly balls
+series[series == "pop_up"] <- "fly_ball"
+```
+
+## Adding numbers to the csv file
+```{r}
+for (i in 1:nrow(series)) {
+  if(series$Batter[i] == "Olund, A") {
+    series$Numbers[i] <- 1
+  }
+  if(series$Batter[i] == "Dexter, S") {
+    series$Numbers[i] <- 2
+  }
+  if(series$Batter[i] == "Novak, N") {
+    series$Numbers[i] <- 3
+  }
+  if(series$Batter[i] == "Pina, L") {
+    series$Numbers[i] <- 4
+  }
+  if(series$Batter[i] == "Alexander, E") {
+    series$Numbers[i] <- 11
+  }
+  if(series$Batter[i] == "Boscan, M") {
+    series$Numbers[i] <- 13
+  }
+  if(series$Batter[i] == "Lopez, B") {
+    series$Numbers[i] <- 14
+  }
+  if(series$Batter[i] == "Prime, C") {
+    series$Numbers[i] <- 16
+  }
+  if(series$Batter[i] == "Thomas, D") {
+    series$Numbers[i] <- 22
+  }
+  if(series$Batter[i] == "Livorsi, B") {
+    series$Numbers[i] <- 23
+  }
+  if(series$Batter[i] == "Silviano, J") {
+    series$Numbers[i] <- 24
+  }
+  
+}
+```
+
+## Adding dimensions
+```{r}
+for (i in 1:nrow(series)) {
+  if(series$Field_Location[i] == 1) {
+    series$hc_x[i] <- runif(1, min = 120, max = 130)
+    series$hc_y[i] <- runif(1, min = -180, max = -165) 
+  }
+  if(series$Field_Location[i] == 2) {
+    series$hc_x[i] <- runif(1, min = 100, max = 150)
+    series$hc_y[i] <- runif(1, min = -245, max = - 215)
+  }
+  if(series$Field_Location[i] == 3) {
+    series$hc_x[i] <- runif(1, min = 145, max = 160)
+    series$hc_y[i] <- runif(1, min = -170, max = -155)
+  }
+  if(series$Field_Location[i] == 4) {
+    series$hc_x[i] <- runif(1, min = 130, max = 160)
+    series$hc_y[i] <- runif(1, min = -150, max = -130)
+  }
+  if(series$Field_Location[i] == 5) {
+    series$hc_x[i] <- runif(1, min = 90, max = 105)
+    series$hc_y[i] <- runif(1, min = -180, max = -150)
+  }
+  if(series$Field_Location[i] == 6) {
+    series$hc_x[i] <- runif(1, min = 100 , max = 120)
+    series$hc_y[i] <- runif(1, min = -150, max = -130)
+  }
+  if(series$Field_Location[i] == 7) {
+    if(series$Events[i] == "home_run") {
+      series$hc_y[i] <- runif(1, min = -60, max = -20)
+    } else {
+      series$hc_y[i] <- runif(1, min = -120, max = -90)
+    }
+    series$hc_x[i] <- runif(1, min = 65, max = 95)
+  }
+  if(series$Field_Location[i] == 8) {
+    if(series$Events[i] == "home_run") {
+      series$hc_y[i] <- runif(1, min = -40, max = -20)
+    } else {
+      series$hc_y[i] <- runif(1, min = -110, max = -60)
+    }
+    series$hc_x[i] <- runif(1, min = 110, max = 140)
+  }
+  if(series$Field_Location[i] == 9) {
+    if(series$Events[i] == "home_run") {
+      series$hc_y[i] <- runif(1, min = -60, max = -20)
+    } else {
+      series$hc_y[i] <- runif(1, min = -120, max = -90)
+    }
+    series$hc_x[i] <- runif(1, min = 155, max = 185)
+  }
+} 
+
+series <- series %>%
+  mutate(hc_x_ = 3*hc_x - 370, 
+         hc_y_ = 3*hc_y + 600, 
+         Events = as.factor(Events))
+```
+
+
+
+```{r}
+ggplot(series, aes(x = hc_x_, y = hc_y_, factor = BB_Type, color = BB_Type, fill = BB_Type)) +
+  geom_text(aes(label = Numbers)) +
+  geom_point(alpha = 0.0, position = "jitter") + 
+  geom_segment(x = 0, xend = 96.25, y = -22, yend = 440, color = "black", linetype = 2) + 
+  geom_segment(x = 0, xend = -96.25, y = -22, yend = 440, color = "black", linetype = 2) +
+  geom_spraychart(stadium_transform_coords = TRUE, stadium_segments = "all",  alpha = 0.0) +
+  coord_cartesian(xlim = c(-200, 200)) +
+  theme_void()
+```
+
+
+Field Locations
+```{r}
+Pitcher <- series %>%
+  filter(Field_Location == 1)
+Catcher <- series %>%
+  filter(Field_Location == 2)
+One <- series %>%
+  filter(Field_Location == 3)
+Two <- series %>%
+  filter(Field_Location == 4)
+SS <- series %>%
+  filter(Field_Location == 6)
+Three <- series %>%
+  filter(Field_Location == 5)
+LF <- series %>%
+  filter(Field_Location == 7)
+CF <- series %>%
+  filter(Field_Location == 8)
+RF <- series %>%
+  filter(Field_Location == 9)
+```
+
+By Player
+```{r}
+Olund <- series %>%
+  filter(Numbers == 1)
+Dexter <- series %>%
+  filter(Numbers == 2)
+Novak <- series %>%
+  filter(Numbers == 3)
+Pina <- series %>%
+  filter(Numbers == 4)
+Alexander <- series %>%
+  filter(Numbers == 11)
+Boscan <- series %>%
+  filter(Numbers == 13)
+Lopez <- series %>%
+  filter(Numbers == 14)
+Prime <- series %>%
+  filter(Numbers == 16)
+Thomas <- series %>%
+  filter(Numbers == 22)
+Livorsi <- series %>%
+  filter(Numbers == 23)
+Silviano <- series %>%
+  filter(Numbers == 24)
+```
+
+
+

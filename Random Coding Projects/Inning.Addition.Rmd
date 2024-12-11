@@ -1,0 +1,56 @@
+---
+title: "Inning.addition"
+author: "Quin Yuter"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Downloading Libraries
+```{r}
+library(tidyverse)
+```
+
+Importing game CSV file
+```{r}
+game.csv <- read.csv("/Users/quinyuter/Desktop/Chicago Dogs/Lincoln_5_14.csv")
+```
+
+Adding the inning column
+```{r}
+game.csv <- game.csv %>%
+  mutate(Inning = 1)
+```
+
+Function to fill the inning column
+```{r}
+Inning <- 1
+for (i in 2:nrow(game.csv)) {
+  game.csv$Inning[i] <- Inning
+  Half_Inning <- 0
+  prior <- i - 1
+  if(game.csv$Outs[i] == 0 & game.csv$Outs[prior] > 0){ ## prior outs > 0 in case of a DP
+    Inning <- Inning + 1
+    Half_Inning <- Half_Inning + 1
+  }
+  if(Half_Inning == 2) {
+    Half_Inning <- 0
+  }
+  game.csv$Inning[i] <- ceiling(game.csv$Inning[i]/2)
+  if(game.csv$Inning[i] == 8 && Half_Inning == 1) {
+    game.csv$Inning[i] == 9
+  }
+}
+```
+
+Writing the csv
+```{r}
+write.csv(game.csv, "/Users/quinyuter/Desktop/Chicago Dogs/Lincoln_5_14.csv")
+```
+
+
+
+

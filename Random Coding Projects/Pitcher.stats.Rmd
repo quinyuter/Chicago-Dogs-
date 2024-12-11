@@ -1,0 +1,59 @@
+---
+title: "Pitcher stats"
+author: "Quin Yuter"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Libraries
+```{r}
+library(tidyverse)
+```
+
+Load in csv
+```{r}
+games <- read.csv("/Users/quinyuter/Desktop/Chicago Dogs/all_games_5_19.csv")
+```
+
+Getting our pitcher specific data
+```{r}
+pitchers <- games %>%
+  filter(Pitcher_Team == "CHI")
+```
+
+--------------------------------------------------------------------------------------------------------
+# Looking at called strike data
+```{r}
+called_strikes <- pitchers %>%
+  filter(Description == "called_strike")
+```
+
+
+--------------------------------------------------------------------------------------------------------
+# Swinging and miss data (including foul balls)
+```{r}
+swing_strike <- pitchers %>%
+  filter(Description == c("swinging_strike", "foul"))
+```
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
